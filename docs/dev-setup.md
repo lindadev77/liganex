@@ -159,3 +159,61 @@ mkdir -p data/namesrv/store data/broker/store && chmod -R 777 data
 
 - Testcontainers 集成测试骨架（`local-dev-env` 2.3）：集成测试复用本套镜像，保证测试库与生产库同源（ADR-0005）
 - 沙箱部署流水线（`local-dev-env` 2.4）：agent 改码 → 构建 → 临时沙箱 → 自动化测试 → 开 PR
+
+## 8. 启动 Studio 后端与前端
+
+基础设施就绪后（PG / Redis 已 `up`），依次起后端与前端即可跑通全栈闭环。Studio 客户端后端位于 `server/liganex-studio-backend/`，前端位于 `studio-frontend/`。
+
+### 8.1 后端（JDK 21，密钥经 `-D` 注入）
+
+系统默认 `java` / `mvn` 指向 **JDK 8**，而本项目目标为 **JDK 21 LTS**，必须显式切换，否则 `record` / 模式匹配 switch 编译失败。
+
+```bash
+export JAVA_HOME=/Users/Admin/Dev/tools/jdk21/Contents/Home   # 本地实际 JDK 21 路径
+cd server
+mvn -pl liganex-studio-backend -am spring-boot:run \
+  -Dserver.port=8081 \
+  -Dliganex.security.jwt.secret="$(openssl rand -base64 48)" \
+  -Dliganex.internal.service-api-key="dev-internal-key" \
+  -Dliganex.open.app-secret-master-key="$(openssl rand -base64 32)"
+```
+
+- 监听 `http://127.0.0.1:8081`；`GET /actuator/health` 返回 `{"status":"UP"}` 即就绪。
+- 三项密钥（`liganex.security.jwt.secret` / `liganex.internal.service-api-key` / `liganex.open.app-secret-master-key`）**未注入会 fail-fast 拒绝启动**（ADR-0007：密钥不入库，仅经启动参数 / 环境变量注入）。
+- 也可 `mvn -pl liganex-studio-backend -am package` 打 jar 后 `java -jar target/liganex-studio-backend-0.1.0-SNAPSHOT.jar -D...` 起服。
+
+### 8.2 前端（Node 20+，Vite 反代 8081）
+
+```bash
+cd studio-frontend
+npm install      # 首次或依赖变更；package.json 已把 lightningcss-darwin-arm64 放入 optionalDependencies
+npm run dev      # 访问 http://127.0.0.1:5173
+```
+
+- Vite 仅反代 `/api → http://127.0.0.1:8081`，与后端同源规避跨域；`/internal` 与 `/mcp` 不暴露给浏览器。
+- dev server 固定绑定 `127.0.0.1`（macOS 下 `localhost` 会解析到 IPv6 `::1` 导致 IPv4 连接被拒）。
+- 构建：`npm run build`（`tsc --noEmit && vite build`），产物在 `dist/`。
+
+### 8.3 验证闭环
+
+浏览器打开 `http://127.0.0.1:5173`：
+
+1. 注册账号 → 登录（拿到 JWT，前端存 localStorage）
+2. 「我的应用」→ 创建应用（页面一次性展示 `appId` + `appSecret`）
+3. 权限管理抽屉勾选 `order:read` 并保存
+4. 后端 `GET /actuator/health` 为 UP、前端能列出应用即闭环跑通
+
+鉴权状态码语义（前端据此做 401 跳转登录）：
+
+| 场景 | 状态码 |
+|---|---|
+| 未携带 / 缺失凭证访问 `/api` 受保护资源 | **401**（`code:40100`） |
+| 已认证但无权限 / 访问越权资源 | **403** |
+| 内部接口 `/internal/**` 缺 `X-Internal-Api-Key` | **401** |
+| MCP `/mcp/**` 签名错误 / 重放 / 越权 scope | 业务层拒绝（JSON-RPC error） |
+
+### 8.4 踩坑
+
+- **JDK 版本**：系统默认 JDK 8，必须用 JDK 21（见 8.1）。
+- **`mvn clean` 不可省**：仅改 pom 的 `maven.compiler.release`（如 25→21）后跑 `mvn compile`，Maven 因源码未变判定"无需编译"，`target/classes` 残留旧字节码，运行时报 `UnsupportedClassVersionError: class file version 69.0`（= Java 25）。改 Java 版本后务必 `mvn clean package` 全量重编，并可用 `javap -verbose -cp target/classes tech.liganex.studio.StudioApplication \| grep major` 校验（65 = Java 21）。
+- **后台进程跨调用不存活**：用 `nohup ... &` 起的进程在 shell 会话结束后会被回收；需要常驻的服务（后端 / 前端 dev）请用可跨会话保活的方式启动（如 IDE / `run_in_background` 任务），否则下次调用时端口已无监听。

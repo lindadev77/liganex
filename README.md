@@ -80,6 +80,33 @@ Liganex 是一套围绕 **Model Context Protocol (MCP)** 构建的开源实验�
 > └── openspec/                    # 变更提案
 > ```
 
+## 本地起服（Quick Start）
+
+最小可跑通的全栈链路：**基础设施（PG / Redis）→ Studio 后端 → Studio 前端**。完整环境搭建（含 OrbStack、RocketMQ、踩坑记录）见 [docs/dev-setup.md](docs/dev-setup.md)。
+
+```bash
+# 0) 基础设施：PG(5432) + Redis(6379)
+cd infra/local-dev && cp .env.example .env && docker compose up -d
+
+# 1) 后端（必须用 JDK 21，系统默认是 JDK 8）
+export JAVA_HOME=/Users/Admin/Dev/tools/jdk21/Contents/Home
+cd server
+mvn -pl liganex-studio-backend -am spring-boot:run \
+  -Dliganex.security.jwt.secret="$(openssl rand -base64 48)" \
+  -Dliganex.internal.service-api-key="dev-internal-key" \
+  -Dliganex.open.app-secret-master-key="$(openssl rand -base64 32)"
+#   → 监听 http://127.0.0.1:8081
+
+# 2) 前端（另开终端）
+cd studio-frontend
+npm install            # 首次或依赖变更；已含 lightningcss 原生二进制（arm64 macOS）
+npm run dev           # Vite 反代 /api → http://127.0.0.1:8081，访问 http://127.0.0.1:5173
+```
+
+> 改 Java 版本后务必 `mvn clean` 全量重编（增量编译不会重编未改源码，会残留旧字节码导致运行时 `UnsupportedClassVersionError`）。密钥经 `-D` 注入，缺失会 fail-fast 拒启动（ADR-0007：密钥不入库）。
+
+**验证闭环**：打开 `http://127.0.0.1:5173` → 注册 → 登录 → 「我的应用」创建应用（拿到一次性 appSecret）→ 绑定 `order:read` 权限，即可在页面跑通。后端 `GET /actuator/health` 返回 `{"status":"UP"}` 即就绪。
+
 ## 技术选型要点
 
 - **后端**：Spring Boot 4.1 + Java 21 LTS（企业 ERP 主栈，MCP Java SDK 可用，生态稀缺）
