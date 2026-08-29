@@ -16,6 +16,6 @@
 
 ## Impact
 
-- 依赖：Spring Boot 2.3.x（与主项目一致）、Java 11+、MCP Java SDK（若官方 SDK 已覆盖 2026-07-28 无状态核心）
+- 依赖：Spring Boot 3.x（LTS 内最新稳定版，与主项目一致）、Java 21+（最低 21，优先 LTS 内最新稳定版）、MCP Java SDK（若官方 SDK 已覆盖 2026-07-28 无状态核心）
 - 受影响代码：`liganex-mcp` 模块
 - 下游受益：`liganex-skills` / `liganex-studio` 将获得可直连验证的服务端

@@ -4,7 +4,7 @@ context: |
   Project: Liganex — 面向跨境 ERP 的 Agent 应用生态平台。两层产品面：
   (1) 基础设施层 — MCP server、开放平台 hub、客户端 studio、skill、AI自动化/可观测/沙箱；
   (2) 应用层 — 面向 B 端客户的 AI 生成应用（文生文/文生文/文生图/图生图/图生视频），可消费 ERP 数据作为生成上下文。
-  Stack: Java 11+ / Spring Boot 2.3.x (MCP server & hub), React/Vue (frontend), Maven or Gradle.
+  Stack: Java（最低 21，优先 LTS 内最新稳定版）/ Spring Boot 3.x（LTS 内最新稳定版） (MCP server & hub), React/Vue (frontend), Maven or Gradle.
   Protocol: MCP 2026-07-28 stateless core — no initialize handshake, no Mcp-Session-Id, single POST
             endpoint; required headers MCP-Protocol-Version / Mcp-Method / Mcp-Name; tool annotations;
             inputSchema; structuredContent (MCP Apps); server/discover.
@@ -19,6 +19,7 @@ context: |
     - 项目文档中凡需标注作者/决策人信息，统一使用 "Linda"（区分于 git 提交作者 lindadev77，后者为 GitHub 账号，保持不变）。
     - 主仓为 monorepo 入口，业务模块拆为独立 GitHub 仓库（详见 README 仓库清单）。
     - Schema 变更用 Flyway 版本化迁移管理（见 ADR-0005）：每次结构变更新增增量 SQL 文件（V__），不回改历史、不手改 CREATE TABLE；禁用 ORM 自动建表（ddl-auto）作为 schema 真相源，Flyway 与 MyBatis-Plus 分工（DDL vs DML）。
+    - 依赖与技术选型原则：前后端用到的框架与组件，原则上在长期支持（LTS）的稳定版本中选择最新的；JDK 最低版本 21（Java 21 LTS 及以上，优先选用 LTS 内最新稳定版，如 Java 21/25 LTS），不主动采用非 LTS 的短期版本。
 
 rules:
   proposal:
