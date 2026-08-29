@@ -32,14 +32,22 @@ docker compose up -d
 
 ```bash
 cd server/liganex-studio-backend
-export JAVA_HOME=/opt/homebrew/opt/openjdk@25/libexec/openjdk.jdk/Contents/Home
-export LIGANEX_JWT_SECRET="$(openssl rand -base64 48)"   # 必填，HS256 至少 32 字节
-export LIGANEX_SERVER_PORT=8081                          # 与前端 vite 反代目标一致
-mvn spring-boot:run
+export JAVA_HOME=/Users/Admin/Dev/tools/jdk21/Contents/Home   # 项目目标 JDK 21 LTS
+mvn -q -Dmaven.test.skip=true package                          # Spring Boot 4.1 起用 maven.test.skip
+
+java \
+  -Dserver.port=8081 \
+  -Dliganex.security.jwt.secret="$(openssl rand -base64 48)" \        # HS256 至少 32 字节
+  -Dliganex.internal.service-api-key="$(openssl rand -hex 32)" \
+  -Dliganex.open.app-secret-master-key="$(openssl rand -base64 32)" \ # AES-256，须 32 字节
+  -jar target/liganex-studio-backend-0.1.0-SNAPSHOT.jar
 ```
 
-> 也可从聚合根构建运行：`cd server && mvn -pl liganex-studio-backend spring-boot:run`。
-> 未注入 `LIGANEX_JWT_SECRET` 时应用会启动失败（fail-fast），不会带着空密钥运行。
+> 密钥一律经**启动参数**注入，不写入任何配置文件（ADR-0007）。
+> 这里用 `-D` 系统属性而非环境变量：非交互式启动器对多行续行的 env 赋值有时不生效（曾导致随机端口 + 配置失效），`-D` 更可靠。
+> 等价的环境变量写法为 `LIGANEX_JWT_SECRET` / `LIGANEX_INTERNAL_API_KEY` / `LIGANEX_APP_SECRET_MASTER_KEY`（见 `application.yml`），二者皆可，系统属性优先级更高。
+> 未注入 JWT 密钥时应用会启动失败（fail-fast），不会带着空密钥运行。
+> 也可从聚合根构建：`cd server && mvn -pl liganex-studio-backend -am -Dmaven.test.skip=true package`。
 
 ## 验证
 
