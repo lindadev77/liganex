@@ -27,6 +27,16 @@
 - 沙箱定义：容器化、带种子数据、不挂载生产凭证。
 - 沙箱是 ADR-0002 轻量授权之上的纵深防御，也是 platform-extensions 中 `agent-dev-loop` 能力的运行底座。
 
+### 存储扩展策略（单机 → 横向）
+
+基于 ADR-0004，本地与实现阶段统一遵循以下存储约定：
+
+- **分区表替代分库分表**：订单 / 流水按时间 Range 分区，商品 / 库存按地区 List 分区；分区键进入主键与高频查询条件，利用分区裁剪只扫命中分区，旧分区经 ATTACH/DETACH 在线归档。
+- **索引与表空间**：时序 / 日志类大表优先 BRIN；热子集用 Partial Index；JSONB / 数组用 GIN；热表 + 热索引放 NVMe，冷历史分区挂大容量盘（表空间冷热分离）。
+- **PgBouncer 必配**：PG 每连接一进程，高并发短连接必须靠连接池补，本地与部署态都应前置。
+- **横向扩展走 Citus**：单实例写吞吐 / 容量触顶时上 Citus 自动分片，不自建分库分表；Greenplum（分析）/ 云托管（Aurora PG / PolarDB）为备选。
+- **autovacuum 调优为运维硬要求**：大表必调频 / 阈值 / cost limit，并管理事务 ID 冻结防回卷。
+
 ## Risks / Trade-offs
 
 - OrbStack 与 Apple Silicon 偶有兼容波动，需锁定版本。

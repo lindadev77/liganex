@@ -51,3 +51,43 @@ The system SHOULD support an AI autonomous dev loop: OpenSpec requirement → ag
 - **GIVEN** 一个 OpenSpec 需求
 - **WHEN** agent 完成改码并构建
 - **THEN** 自动部署到临时沙箱，跑 Testcontainers 测试，通过则开 PR 等人工合并，全程不挂生产凭证
+
+### Requirement: 分区表替代分库分表
+The system SHOULD use native declarative partitioning (Range by time, List by region) instead of manual sharding, with the partition key included in primary keys and hot query predicates to enable partition pruning.
+
+#### Scenario: 大表按时间/地区切分
+- **GIVEN** 订单 / 流水随时间增长、商品 / 库存按地区分布
+- **WHEN** 建表与查询
+- **THEN** 使用 Range（时间）/ List（地区）分区，分区键进主键与查询条件，旧分区可经 ATTACH/DETACH 在线归档
+
+### Requirement: 索引与表空间冷热分离
+The system SHOULD choose index types by access pattern (BRIN for time-series, Partial for hot subsets, GIN for JSONB/arrays) and place hot tables/indexes on fast storage while cold historical partitions use capacity storage via tablespaces.
+
+#### Scenario: 大表索引与冷热分离
+- **GIVEN** 一张时序大表与一张带 JSONB 属性的商品表
+- **WHEN** 建索引与布局存储
+- **THEN** 时序表用 BRIN、热子集用 Partial Index、JSONB 用 GIN，热数据落 NVMe、冷历史分区落大容量盘
+
+### Requirement: PgBouncer 连接池
+The system MUST front Postgres with PgBouncer (or equivalent pooler), because PostgreSQL spawns one process per connection and high-concurrency short connections must be pooled.
+
+#### Scenario: 高并发短连接
+- **GIVEN** 业务系统高频短连接访问数据库
+- **WHEN** 连接建立
+- **THEN** 经 PgBouncer 池化，避免连接数膨胀拖垮实例
+
+### Requirement: Citus 横向扩展路径（触发式）
+When a single Postgres instance hits capacity or write-throughput limits that partitioning, indexing, and read replicas cannot resolve, the system SHOULD adopt Citus for automatic sharding (SQL-compatible) rather than building custom sharding middleware.
+
+#### Scenario: 单实例触顶
+- **GIVEN** 单实例已无法通过分区 / 索引 / 只读副本消解负载
+- **WHEN** 需要横向扩展
+- **THEN** 引入 Citus 自动分片，不自建分库分表路由 / 双写 / 跨分片 join 拼接
+
+### Requirement: autovacuum 运维调优
+The system MUST tune autovacuum (frequency, thresholds, cost limit) and manage transaction-id freezing on large tables to prevent bloat and wrap-around, leveraging per-partition vacuum/analyze for low maintenance cost.
+
+#### Scenario: 大表膨胀防控
+- **GIVEN** 持续增长的大表
+- **WHEN** 运行维护
+- **THEN** autovacuum 按表调优并管理冻结，分区表各自独立 vacuum/analyze
