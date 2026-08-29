@@ -1,0 +1,30 @@
+{
+  "name": "liganex-studio-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "antd": "^6.6.0",
+    "axios": "^1.20.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@vitejs/plugin-react": "^6.1.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.2"
+  },
+  "optionalDependencies": {
+    "lightningcss-darwin-arm64": "^1.33.0"
+  }
+}

@@ -1,0 +1,55 @@
+package tech.liganex.studio.common;
+
+/**
+ * 业务错误码。对外只暴露 message，不泄露内部异常细节。
+ */
+public enum ErrorCode {
+
+    // 通用
+    BAD_REQUEST(40000, "请求参数有误"),
+    UNAUTHORIZED(40100, "未认证或认证已失效"),
+    FORBIDDEN(40300, "没有访问权限"),
+    NOT_FOUND(40400, "资源不存在"),
+    INTERNAL_ERROR(50000, "服务内部错误"),
+
+    // 用户与认证（user-auth）
+    EMAIL_ALREADY_EXISTS(41001, "该邮箱已被注册"),
+    INVALID_CREDENTIALS(41002, "邮箱或密码错误"),
+    USER_DISABLED(41003, "账号已被停用"),
+    INVALID_TOKEN(41004, "令牌无效或已过期"),
+
+    // 开放平台（open-platform-app）
+    APP_NOT_FOUND(42001, "应用不存在"),
+    APP_DISABLED(42002, "应用已被停用"),
+    PERMISSION_NOT_FOUND(42003, "权限不存在"),
+
+    // 订单（order-query）
+    ORDER_QUERY_FAILED(43001, "订单查询失败"),
+
+    // 内部服务接口（internal-api）
+    INTERNAL_API_KEY_INVALID(45001, "服务间凭证无效"),
+
+    // MCP / 开放平台签名鉴权（mcp-auth）
+    SIGNATURE_INVALID(44001, "签名校验失败"),
+    TIMESTAMP_EXPIRED(44002, "请求时间戳超出有效期"),
+    NONCE_REPLAY(44003, "nonce 重复，疑似重放攻击"),
+    SCOPE_FORBIDDEN(44004, "应用未授权该权限"),
+    QUOTA_EXCEEDED(44005, "调用配额已用尽"),
+    APP_SECRET_BROKEN(44006, "应用密钥不可用");
+
+    private final int code;
+    private final String message;
+
+    ErrorCode(int code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
+    public int code() {
+        return code;
+    }
+
+    public String message() {
+        return message;
+    }
+}
