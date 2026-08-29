@@ -18,4 +18,9 @@ public class Permission {
     private String name;
 
     private String description;
+
+    /**
+     * 是否已开放（后端已落地真实接口的权限才为 true）。前端据此只展示已做好的权限项。
+     */
+    private Boolean opened;
 }

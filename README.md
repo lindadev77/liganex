@@ -2,12 +2,12 @@
 
 > Agent 应用生态的连接层 —— 让模型接得上工具，让开发者接得上平台，让用户接得上服务。
 >
-> 以**跨境 ERP**（订单 / 商品 / 库存 / 结算）为落地场景，验证 MCP + Skill + 客户端 + 开放平台的端到端可行性。
+> 以**业务运营场景**（订单 / 商品 / 库存）为落地场景，验证 MCP + Skill + 客户端 + 开放平台的端到端可行性。
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-2026--07--28-red.svg)](https://modelcontextprotocol.org)
 [![Stack](https://img.shields.io/badge/Backend-Spring%20Boot%204.1-6DB33F.svg)](https://spring.io)
-[![Topics](https://img.shields.io/badge/topics-mcp%20%7C%20agent%20%7C%20erp%20%7C%20cross--border-ecommerce-orange.svg)](#)
+[![Topics](https://img.shields.io/badge/topics-mcp%20%7C%20agent%20%7C%20spring--boot%20%7C%20react-orange.svg)](#)
 
 ---
 
@@ -19,16 +19,16 @@ Liganex 是一套围绕 **Model Context Protocol (MCP)** 构建的开源实验�
 
 | 组件 | 定位 | 仓库 |
 |---|---|---|
-| **Liganex MCP Server** | 供给侧：把 ERP 数据与能力暴露为 MCP tools | `liganex-mcp` |
+| **Liganex MCP Server** | 供给侧：把业务数据与能力暴露为 MCP tools | `liganex-mcp` |
 | **Liganex Studio** | 客户端：轻量 MCP Host / 编排运行时（B 端前端 + 后端，同仓） | `server/liganex-studio-backend` + `studio-frontend` |
-| **Liganex Skills** | 能力封装：面向跨境 ERP 的领域 Skill 包 | `liganex-skills` |
+| **Liganex Skills** | 能力封装：面向业务领域的 Skill 包 | `liganex-skills` |
 | **Liganex Hub** | 分发：Skill 注册表 + MCP Server 注册中心 | `liganex-hub` |
 
-业务场景以**跨境 ERP**为锚点：多平台 SKU、多仓库存、跨境头程时效、汇率结算、退货冲回 —— 这些是你真正跑过、别人抄不走的数据模型。
+业务场景以**业务运营**为锚点：订单流转、商品目录、多仓库存 —— 用一套真实可跑的数据模型承载 Agent 与业务系统的对接。
 
-## 为什么不直接叫"跨境 ERP"
+## 为什么不垂直化命名
 
-名字保持通用。`liganex` 全站零同名（GitHub total: 0），而垂直化的名字（如 `temu-erp-agent`）会把天花板锁死还绑死平台。跨境 ERP 是**场景**，不是**前缀**。
+名字保持通用。`liganex` 全站零同名（GitHub total: 0），而垂直化的名字（如 `temu-erp-agent`）会把天花板锁死还绑死平台。业务场景是**可替换的落地场景**，不是项目前缀。
 
 ## 架构（四层）
 
@@ -46,7 +46,7 @@ Liganex 是一套围绕 **Model Context Protocol (MCP)** 构建的开源实验�
 ┌───────▼───────┐    ┌──────────────▼──────────────┐
 │  Liganex MCP  │    │        Liganex Skills        │
 │    Server     │    │ replenishment · margin · ... │
-│ ERP 数据/工具  │    └──────────────────────────────┘
+│ 业务数据/工具  │    └──────────────────────────────┘
 └───────────────┘
 ```
 
@@ -58,7 +58,7 @@ Liganex 是一套围绕 **Model Context Protocol (MCP)** 构建的开源实验�
 | `liganex-mcp` | Java + Spring Boot 实现的 MCP Server | P0 |
 | `liganex-docs` | 设计文档、Spec、ADR | P0 |
 | `liganex-studio`（已并入本仓） | 客户端运行时 → `server/liganex-studio-backend/` + `studio-frontend/` | P1 |
-| `liganex-skills` | 跨境 ERP 领域 Skill 包（MIT） | P1 |
+| `liganex-skills` | 业务领域 Skill 包（MIT） | P1 |
 | `liganex-hub` | 注册表与分发 | P2 |
 | `liganex-support` | 智能客服问答示例 | P2 |
 | `.github` | 组织级 CI / 模板 | P0 |
@@ -90,11 +90,11 @@ cd infra/local-dev && cp .env.example .env && docker compose up -d
 
 # 1) 后端（必须用 JDK 21，系统默认是 JDK 8）
 export JAVA_HOME=/Users/Admin/Dev/tools/jdk21/Contents/Home
-cd server
-mvn -pl liganex-studio-backend -am spring-boot:run \
-  -Dliganex.security.jwt.secret="$(openssl rand -base64 48)" \
-  -Dliganex.internal.service-api-key="dev-internal-key" \
-  -Dliganex.open.app-secret-master-key="$(openssl rand -base64 32)"
+cd server/liganex-studio-backend
+export LIGANEX_JWT_SECRET="$(openssl rand -base64 48)"
+export LIGANEX_INTERNAL_API_KEY="dev-internal-key"
+export LIGANEX_APP_SECRET_MASTER_KEY="$(openssl rand -base64 32)"
+mvn spring-boot:run
 #   → 监听 http://127.0.0.1:8081
 
 # 2) 前端（另开终端）
@@ -103,13 +103,15 @@ npm install            # 首次或依赖变更；已含 lightningcss 原生二�
 npm run dev           # Vite 反代 /api → http://127.0.0.1:8081，访问 http://127.0.0.1:5173
 ```
 
-> 改 Java 版本后务必 `mvn clean` 全量重编（增量编译不会重编未改源码，会残留旧字节码导致运行时 `UnsupportedClassVersionError`）。密钥经 `-D` 注入，缺失会 fail-fast 拒启动（ADR-0007：密钥不入库）。
+> 改 Java 版本后务必 `mvn clean` 全量重编（增量编译不会重编未改源码，会残留旧字节码导致运行时 `UnsupportedClassVersionError`）。密钥经环境变量注入（`application.yml` 仅含 `${LIGANEX_*:}` 占位），缺失会 fail-fast 拒启动（ADR-0007：密钥不入库）。`spring-boot:run` 需在模块目录内执行：Boot 4.1 fork 子进程跑应用，Maven `-D` 参数不会透传。
 
-**验证闭环**：打开 `http://127.0.0.1:5173` → 注册 → 登录 → 「我的应用」创建应用（拿到一次性 appSecret）→ 绑定 `order:read` 权限，即可在页面跑通。后端 `GET /actuator/health` 返回 `{"status":"UP"}` 即就绪。
+**验证闭环**：打开 `http://127.0.0.1:5173` → 注册 → 登录 → 「我的应用」创建应用（拿到一次性 appSecret）→ 管理权限勾选（下拉仅展示已开放的权限，当前 6 项：`order:read` / `order:write` / `product:read` / `product:write` / `inventory:read` / `inventory:write`，由 8 个真实 MCP 工具承接：订单查/建/改状态/发货 + 商品查/写 + 库存查/调整），即可在页面跑通。后端 `GET /actuator/health` 返回 `{"status":"UP"}` 即就绪。
+
+**Skill 闭环**（对话式打通业务数据）：skill 以**客户分发 zip**交付，一个业务域一个包（系统复杂时由多个包各自覆盖各自场景）。源统一放在仓库顶层 `skills/<name>/`（随代码一起提交管理，每个目录自包含：`skill.json` 声明名称/版本/所需权限 + `SKILL.md` + 客户 `README` + `scripts/liganex_mcp.py` 签名客户端）。`scripts/package-skill.sh` 把全部（或指定）skill 打成 `dist/<name>-<版本>.zip` 并同步进后端资源、生成清单。服务部署后：`GET /mcp/v1/skills` 返回可用包清单（名称/版本/说明/所需权限/下载地址），`GET /mcp/v1/skills/<name>.zip` 按清单提供下载（开放平台「我的应用」页「Skill 包」弹窗同款入口）。客户解包后把目录放进 agent 终端（Qoder / workbuddy 等）的 skill 目录，把应用的 appId + 一次性密钥交给 agent，即可对话操作对应业务域的数据。每次调用走 HMAC 签名（`POST\n/mcp/v1\n{ts}\n{nonce}\n{body}`）+ scope 校验 + 配额 + 审计（ADR-0002/0009）。当前两个包：`liganex-biz-ops`（业务运营操作，6 权限 8 工具）与 `liganex-ops-report`（运营分析报表，只读 3 权限）。改 skill 内容后须重跑打包脚本再部署。
 
 ## 技术选型要点
 
-- **后端**：Spring Boot 4.1 + Java 21 LTS（企业 ERP 主栈，MCP Java SDK 可用，生态稀缺）
+- **后端**：Spring Boot 4.1 + Java 21 LTS（企业级 Java 主栈，MCP Java SDK 可用，生态稀缺）
 - **协议**：MCP **2026-07-28** 无状态核心 —— 单端点 POST、移除 `initialize`/`Mcp-Session-Id`、每请求 `_meta` 携带版本能力、`server/discover` 强制发现
 - **工具标注**：用 `tool.annotations`（`readOnlyHint` / `destructiveHint` / `idempotentHint` / `openWorldHint`）声明副作用等级，既是安全也是体验优化
 - **展示**：MCP Apps（`outputSchema` + `structuredContent`）让库存/利润看板结构化渲染
@@ -129,13 +131,13 @@ npm run dev           # Vite 反代 /api → http://127.0.0.1:8081，访问 http
 ## 路线
 
 1. **P0**：主仓 README + `liganex-mcp` 骨架（2026-07-28 请求头处理 + annotations）
-2. **P1**：跨境 ERP Skill 包（补货建议 / 利润核算 / 异常订单）
+2. **P1**：业务 Skill 包（运营报表 / 异常订单处理）
 3. **P1**：`liganex-studio` 客户端运行时
 4. **P2**：`liganex-hub` 注册表 + 智能客服
 
 ## Topics
 
-`mcp` · `model-context-protocol` · `agent` · `erp` · `java` · `spring-boot` · `cross-border-ecommerce`
+`mcp` · `model-context-protocol` · `agent` · `java` · `spring-boot` · `react` · `typescript`
 
 ## 开源许可
 

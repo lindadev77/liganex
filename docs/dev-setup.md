@@ -164,23 +164,23 @@ mkdir -p data/namesrv/store data/broker/store && chmod -R 777 data
 
 基础设施就绪后（PG / Redis 已 `up`），依次起后端与前端即可跑通全栈闭环。Studio 客户端后端位于 `server/liganex-studio-backend/`，前端位于 `studio-frontend/`。
 
-### 8.1 后端（JDK 21，密钥经 `-D` 注入）
+### 8.1 后端（JDK 21，密钥经环境变量注入）
 
 系统默认 `java` / `mvn` 指向 **JDK 8**，而本项目目标为 **JDK 21 LTS**，必须显式切换，否则 `record` / 模式匹配 switch 编译失败。
 
 ```bash
 export JAVA_HOME=/Users/Admin/Dev/tools/jdk21/Contents/Home   # 本地实际 JDK 21 路径
-cd server
-mvn -pl liganex-studio-backend -am spring-boot:run \
-  -Dserver.port=8081 \
-  -Dliganex.security.jwt.secret="$(openssl rand -base64 48)" \
-  -Dliganex.internal.service-api-key="dev-internal-key" \
-  -Dliganex.open.app-secret-master-key="$(openssl rand -base64 32)"
+cd server/liganex-studio-backend
+export LIGANEX_JWT_SECRET="$(openssl rand -base64 48)"
+export LIGANEX_INTERNAL_API_KEY="dev-internal-key"
+export LIGANEX_APP_SECRET_MASTER_KEY="$(openssl rand -base64 32)"
+mvn spring-boot:run
 ```
 
 - 监听 `http://127.0.0.1:8081`；`GET /actuator/health` 返回 `{"status":"UP"}` 即就绪。
-- 三项密钥（`liganex.security.jwt.secret` / `liganex.internal.service-api-key` / `liganex.open.app-secret-master-key`）**未注入会 fail-fast 拒绝启动**（ADR-0007：密钥不入库，仅经启动参数 / 环境变量注入）。
-- 也可 `mvn -pl liganex-studio-backend -am package` 打 jar 后 `java -jar target/liganex-studio-backend-0.1.0-SNAPSHOT.jar -D...` 起服。
+- 三项密钥（`LIGANEX_JWT_SECRET` / `LIGANEX_INTERNAL_API_KEY` / `LIGANEX_APP_SECRET_MASTER_KEY`）**未注入会 fail-fast 拒绝启动**（ADR-0007：密钥不入库，仅经环境变量注入；`application.yml` 只有 `${LIGANEX_*:}` 占位）。
+- `spring-boot:run` 必须在模块目录内执行：Boot 4.1 fork 子进程运行应用，从 `server` 聚合目录带 `-pl` 跑会在父模块报 "Unable to find a suitable main class"，且 Maven `-D` 参数不透传给应用进程。
+- 也可 `mvn -pl liganex-studio-backend -am package` 打 jar 后 `LIGANEX_JWT_SECRET=... java -jar target/liganex-studio-backend-0.1.0-SNAPSHOT.jar` 起服。
 
 ### 8.2 前端（Node 20+，Vite 反代 8081）
 

@@ -1,0 +1,15 @@
+{
+  "name": "liganex-biz-ops",
+  "version": "0.1.0",
+  "description": "业务运营操作：对话式查订单/建单/改状态/发货/商品维护/库存调整（HMAC 签名走 MCP）",
+  "entry": "SKILL.md",
+  "runtime": "python3",
+  "scopes": [
+    "order:read",
+    "order:write",
+    "product:read",
+    "product:write",
+    "inventory:read",
+    "inventory:write"
+  ]
+}

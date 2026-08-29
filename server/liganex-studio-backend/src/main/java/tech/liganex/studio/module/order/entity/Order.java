@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 /**
- * 跨境订单（分区表，ADR-0004：RANGE(created_at) + LIST(region)）。
+ * 订单（分区表，ADR-0004：RANGE(created_at) + LIST(region)）。
  *
  * <p>查询条件须带上分区键（时间、地区）以命中分区裁剪。
  */

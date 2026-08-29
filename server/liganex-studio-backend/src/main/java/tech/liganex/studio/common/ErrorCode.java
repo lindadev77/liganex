@@ -23,8 +23,9 @@ public enum ErrorCode {
     APP_DISABLED(42002, "应用已被停用"),
     PERMISSION_NOT_FOUND(42003, "权限不存在"),
 
-    // 订单（order-query）
+    // 订单（order-query / order-write）
     ORDER_QUERY_FAILED(43001, "订单查询失败"),
+    ORDER_NOT_FOUND(43002, "订单不存在"),
 
     // 内部服务接口（internal-api）
     INTERNAL_API_KEY_INVALID(45001, "服务间凭证无效"),

@@ -16,6 +16,7 @@ export interface PermissionDTO {
   code: string;
   name: string;
   description: string;
+  opened: boolean;
 }
 
 export async function createApp(name: string): Promise<AppSecretResponse> {

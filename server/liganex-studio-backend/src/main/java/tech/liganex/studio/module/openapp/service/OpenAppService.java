@@ -66,17 +66,20 @@ public class OpenAppService {
             if (permission == null) {
                 throw new BizException(ErrorCode.PERMISSION_NOT_FOUND);
             }
-            long bound = appPermissionMapper.selectCount(
-                    new LambdaQueryWrapper<AppPermission>()
-                            .eq(AppPermission::getAppId, appId)
-                            .eq(AppPermission::getPermissionCode, code));
-            if (bound == 0) {
-                AppPermission ap = new AppPermission();
-                ap.setAppId(appId);
-                ap.setPermissionCode(code);
-                ap.setCreatedAt(Instant.now());
-                appPermissionMapper.insert(ap);
+            if (permission.getOpened() == null || !permission.getOpened()) {
+                throw new BizException(ErrorCode.PERMISSION_NOT_FOUND, "权限未开放: " + code);
             }
+        }
+
+        // 全量替换：先清空再插入，保证「取消勾选后保存」能真实解绑
+        appPermissionMapper.delete(
+                new LambdaQueryWrapper<AppPermission>().eq(AppPermission::getAppId, appId));
+        for (String code : permissionCodes.stream().distinct().toList()) {
+            AppPermission ap = new AppPermission();
+            ap.setAppId(appId);
+            ap.setPermissionCode(code);
+            ap.setCreatedAt(Instant.now());
+            appPermissionMapper.insert(ap);
         }
         log.info("app permissions bound appId={} codes={}", appId, permissionCodes);
     }

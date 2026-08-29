@@ -1,0 +1,12 @@
+{
+  "name": "liganex-ops-report",
+  "version": "0.1.0",
+  "description": "运营分析：按地区/时间统计订单与 GMV、商品目录盘点、分仓库存快照（只读，不改变业务数据）",
+  "entry": "SKILL.md",
+  "runtime": "python3",
+  "scopes": [
+    "order:read",
+    "product:read",
+    "inventory:read"
+  ]
+}
