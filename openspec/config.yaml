@@ -16,6 +16,7 @@ context: |
     - 关键架构决策写入 docs/adr/，对应约束进入 openspec/specs/ 作为可验证事实来源。
     - 安全采用轻量授权：单一 API Key + 工具白名单 + 全量审计日志 + 演示只读副本；不做 OAuth 2.1。
     - spec 使用 RFC 2119 关键词（SHALL/MUST/SHOULD），场景使用 GIVEN/WHEN/THEN。
+    - 项目文档中凡需标注作者/决策人信息，统一使用 "Linda"（区分于 git 提交作者 lindadev77，后者为 GitHub 账号，保持不变）。
     - 主仓为 monorepo 入口，业务模块拆为独立 GitHub 仓库（详见 README 仓库清单）。
 
 rules:
