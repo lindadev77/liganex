@@ -31,6 +31,12 @@ generateVideo(imageRef, motion, opts)  -> VideoResult
 - 生成前预检配额，超额直接拒绝且**不调用供应商**（关键：避免成本失控）。
 - 仅做用量统计与上限，不做完整计费账单（Non-goals）。
 
+## 流式对话工作台（B 端统一入口）
+- 对话是 B 端客户与系统交互的主界面：文本/图片输入 → 意图识别 → 路由到生成能力或 ERP 查询（经 liganex-mcp）→ 流式返回。
+- 流式传输：后端以 SSE（首选，server→client 单向、实现简单）或 WebSocket 推送 token；前端边收边渲染，支持中断/重试。
+- 会话状态（多轮上下文、上传的参考图）由应用侧（liganex-studio / liganex-gen）维护，**MCP 层保持无状态**——与 baseline 的"MCP 2026-07-28 stateless core"一致：MCP 不保存会话。
+- 该工作台是此前规划的"智能客服问答"（ERP 数据查询）与本次"AI 生成"两类能力的自然汇合点：同一个聊天框，既能问"美国仓库存多少"，也能说"给这个 SKU 写德语 Listing"。
+
 ## 仓库归属提议（待确认）
 - **生成后端** 建议独立为业务仓库 `liganex-gen`（模型抽象、异步任务、配额、资产存储），符合"前端不单独建仓、业务模块独立仓"的约定。
 - **B 端工作台 UI** 并入 `liganex-studio` 的 `frontend/`（studio 作为 B 端门面，承载生成工作台 + 客户/配额管理）。
