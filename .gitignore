@@ -46,6 +46,12 @@ out/
 *.pem
 *.key
 secrets/
+# Local secret overrides (never commit real values)
+application-*.local.yml
+*.secret.yml
+# Real per-env configs carry secrets; keep templates (.example) committable instead
+application-prod.yml
+application-test.yml
 
 # ===== Local data / logs =====
 data/
