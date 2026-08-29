@@ -1,0 +1,181 @@
+# Liganex 本地开发环境基础设施
+#
+# 选型依据：ADR-0004（数据架构与存储扩展策略）
+#   - Postgres + pgvector：业务数据与向量同源，规避双写
+#   - Redis 8：语义缓存 / agent 会话 / 限流
+#   - RocketMQ 5：事务消息 / 延迟消息 / 顺序消息，契合结算与订单超时
+#
+# 用法：
+#   cd infra/local-dev
+#   cp .env.example .env      # .env 已 gitignore，绝不入库
+#   docker compose up -d
+#   docker compose --profile tools up -d   # 额外拉起 RocketMQ Dashboard
+#
+# 注意：所有口令均为本地 dev 占位值，不含任何真实凭证（ADR-0007）。
+# 生产/测试环境的真实值一律经启动参数或环境变量注入，不写入本文件。
+
+name: liganex-local-dev
+
+services:
+  # ---------------- Postgres + pgvector ----------------
+  postgres:
+    image: pgvector/pgvector:pg18
+    container_name: liganex-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-liganex}
+      POSTGRES_USER: ${POSTGRES_USER:-liganex}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-liganex_dev}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    # PG18+ 镜像要求挂载 /var/lib/postgresql（数据落在版本子目录 <ver>/data），
+    # 挂载 .../data 会因目录约定变更而启动失败。
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-liganex} -d ${POSTGRES_DB:-liganex}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    mem_limit: 2g
+    networks:
+      - liganex-dev
+
+  # ---------------- Redis 8 ----------------
+  redis:
+    image: redis:8-alpine
+    container_name: liganex-redis
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - 512mb
+      - --maxmemory-policy
+      - noeviction
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 1g
+    networks:
+      - liganex-dev
+
+  # ---------------- RocketMQ 5 : NameServer ----------------
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.3.3
+    container_name: liganex-rocketmq-namesrv
+    restart: unless-stopped
+    command: sh mqnamesrv
+    environment:
+      JAVA_OPT_EXT: -Xms512m -Xmx512m -Xmn256m
+    ports:
+      - "${ROCKETMQ_NAMESRV_PORT:-9876}:9876"
+    # 用宿主机目录而非命名卷：容器以 uid=3000(rocketmq) 运行，
+    # OrbStack 新建命名卷默认 root:root 755，会导致 store 不可写而启动失败。
+    volumes:
+      - ./data/namesrv/store:/home/rocketmq/store
+      - ./data/namesrv/logs:/home/rocketmq/logs
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/9876'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    mem_limit: 1g
+    networks:
+      - liganex-dev
+
+  # ---------------- RocketMQ 5 : Broker ----------------
+  rocketmq-broker:
+    image: apache/rocketmq:5.3.3
+    container_name: liganex-rocketmq-broker
+    restart: unless-stopped
+    command: sh mqbroker -c /home/rocketmq/conf/broker.conf
+    environment:
+      NAMESRV_ADDR: liganex-rocketmq-namesrv:9876
+      JAVA_OPT_EXT: -Xms1g -Xmx1g -Xmn512m
+    ports:
+      - "${ROCKETMQ_BROKER_PORT:-10911}:10911"
+      - "${ROCKETMQ_BROKER_HA_PORT:-10912}:10912"
+      - "${ROCKETMQ_BROKER_VIP_PORT:-10909}:10909"
+    volumes:
+      - ./rocketmq/broker.conf:/home/rocketmq/conf/broker.conf:ro
+      - ./data/broker/store:/home/rocketmq/store
+      - ./data/broker/logs:/home/rocketmq/logs
+    depends_on:
+      rocketmq-namesrv:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/10911'"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 25s
+    mem_limit: 2g
+    networks:
+      - liganex-dev
+
+  # ---------------- RocketMQ 5 : Proxy (gRPC / Remoting，可选) ----------------
+  # 仅当使用 gRPC 客户端（多语言 SDK / RocketMQ 5.x 新客户端）时才需要。
+  # 默认不启动：broker 注册的 brokerIP1=127.0.0.1 便于宿主机直连，
+  # 而 proxy 在容器内按该地址回连 broker 会失败（详见 docs/dev-setup.md）。
+  rocketmq-proxy:
+    image: apache/rocketmq:5.3.3
+    container_name: liganex-rocketmq-proxy
+    restart: unless-stopped
+    profiles:
+      - grpc
+    command: sh mqproxy
+    environment:
+      NAMESRV_ADDR: liganex-rocketmq-namesrv:9876
+      JAVA_OPT_EXT: -Xms512m -Xmx512m -Xmn256m
+    ports:
+      - "${ROCKETMQ_PROXY_REMOTING_PORT:-8080}:8080"
+      - "${ROCKETMQ_PROXY_GRPC_PORT:-8081}:8081"
+    depends_on:
+      rocketmq-broker:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8080'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    mem_limit: 1g
+    networks:
+      - liganex-dev
+
+  # ---------------- RocketMQ Dashboard (可选) ----------------
+  rocketmq-dashboard:
+    image: apacherocketmq/rocketmq-dashboard:latest
+    container_name: liganex-rocketmq-dashboard
+    restart: unless-stopped
+    profiles:
+      - tools
+    environment:
+      JAVA_OPTS: -Drocketmq.namesrv.addr=liganex-rocketmq-namesrv:9876 -Dserver.port=8080
+    ports:
+      - "${ROCKETMQ_DASHBOARD_PORT:-8180}:8080"
+    depends_on:
+      rocketmq-namesrv:
+        condition: service_healthy
+    mem_limit: 1g
+    networks:
+      - liganex-dev
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  liganex-dev:
+    name: liganex-dev
