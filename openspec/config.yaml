@@ -1,13 +1,17 @@
 schema: spec-driven
 
 context: |
-  Project: Liganex — Agent 应用生态的连接层，以跨境 ERP 为场景（订单/商品/库存数据流）。
+  Project: Liganex — 面向跨境 ERP 的 Agent 应用生态平台。两层产品面：
+  (1) 基础设施层 — MCP server、开放平台 hub、客户端 studio、skill、AI自动化/可观测/沙箱；
+  (2) 应用层 — 面向 B 端客户的 AI 生成应用（文生文/文生文/文生图/图生图/图生视频），可消费 ERP 数据作为生成上下文。
   Stack: Java 11+ / Spring Boot 2.3.x (MCP server & hub), React/Vue (frontend), Maven or Gradle.
   Protocol: MCP 2026-07-28 stateless core — no initialize handshake, no Mcp-Session-Id, single POST
             endpoint; required headers MCP-Protocol-Version / Mcp-Method / Mcp-Name; tool annotations;
             inputSchema; structuredContent (MCP Apps); server/discover.
   Conventions:
     - 仓库统一 liganex- 前缀；前端置于业务仓的 frontend/ 目录，不单独建仓。
+    - AI 生成能力统一经模型供应商抽象层接入（首期 Volcengine 方舟/Seedream/即梦，预留 OpenAI 等），避免绑定单一厂商。
+    - B 端应用面需具备按客户用量/配额控制（成本控制），与基础设施层的轻量授权（ADR-0002）边界不同。
     - 关键架构决策写入 docs/adr/，对应约束进入 openspec/specs/ 作为可验证事实来源。
     - 安全采用轻量授权：单一 API Key + 工具白名单 + 全量审计日志 + 演示只读副本；不做 OAuth 2.1。
     - spec 使用 RFC 2119 关键词（SHALL/MUST/SHOULD），场景使用 GIVEN/WHEN/THEN。

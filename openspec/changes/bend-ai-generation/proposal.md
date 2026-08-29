@@ -1,0 +1,33 @@
+# Change: B 端 AI 生成应用（bend-ai-generation）
+
+## Why
+当前 Liganex 的产品面集中在基础设施层（MCP server、开放平台 hub、客户端 studio、skill）与平台扩展（AI 自动化/可观测/沙箱）。
+面向 B 端客户的**直接价值**尚未落地——客户需要的是成品：商品文案、主图、场景图、营销视频，而不是一个工具接口。
+跨境 ERP 场景下，卖家每天要生产大量 Listing 文案、多语言翻译、商品图与短视频，这些是高频、刚需、可量化付费的痛点。
+因此新增应用层：以 ERP 业务数据作为上下文，调用模型供应商产出内容，构成 Liganex 面向 B 端的营收面。
+
+## What Changes
+- 新增 capability `ai-content-generation`，覆盖四类生成能力：文生文、文生图、图生图、图生视频。
+- 新增模型供应商抽象层（首期 Volcengine 方舟/Seedream/即梦，预留 OpenAI 等），避免绑定单一厂商。
+- 新增异步任务框架（生图/生视频为长任务，需提交→轮询/回调→结果）。
+- 新增按客户的用量/配额控制（成本控制，区别于基础设施层的轻量授权）。
+- 可选：生成前经 liganex-mcp 拉取商品/订单数据作为生成上下文（grounded generation）。
+
+## Impact
+- 新增业务仓库（详见 design.md 的仓库归属提议）：建议生成后端独立为 `liganex-gen`，B 端工作台 UI 并入 `liganex-studio`。
+- 影响 `openspec/config.yaml` 项目定位（已更新为"两层产品面"）。
+- 不影响已归档的 mcp-server / security 主规范；仅对 security 的授权边界做澄清（见下）。
+- 新增前端 surface：B 端客户登录后的生成工作台。
+
+## Non-goals
+- 不做通用 AIGC 平台：聚焦跨境 ERP 卖家场景（商品文案/图文/短视频），不泛化到任意创作。
+- 不绑定单一模型厂商：抽象层必须可插拔，首期只实现 Volcengine 适配。
+- 首期不做多模型自动择优/质量路由（仅配置化静态路由）。
+- 不实现完整计费账单系统：仅做用量统计与客户级配额上限（防成本失控），计费留给后续。
+- 不替代 liganex-mcp：mcp 是数据/工具连接层；本应用层是其消费方之一，而非并入。
+
+## ADR Relationship
+- 关联 `docs/adr/ADR-0002-auth-scope`：明确 **ADR-0002 的轻量授权仅覆盖基础设施层（MCP/ERP 连接、内部工具）**，
+  其"不实现 OAuth 2.1 / 细粒度 scope"的结论**不适用于本 B 端应用面**。B 端面向外部付费客户，至少需客户级 API Key + 用量/配额控制。
+- 触发 ADR-0002 中声明的补齐条件："一旦接入多租户或真实客户数据，须补齐 OAuth 2.1 + scope 校验"——本应用面即该触发场景。
+- 新建 `docs/adr/ADR-0003-bend-auth-quota.md` 记录 B 端应用的多租户/配额授权边界（见 tasks）。
