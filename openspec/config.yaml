@@ -23,6 +23,7 @@ context: |
     - 稳定与探索的平衡：在 LTS 基线保障核心链路稳定的前提下，允许在受控范围内尝试更新的特性与实验性技术（如新 SDK、新中间件、新 AI 能力）。实验性依赖须隔离在独立模块或特性开关之后，经 agent-dev-loop 沙箱或非生产环境验证，不得进入核心链路、不得破坏 baseline 兼容性，且须通过 OpenSpec change 走评审，而非直接修改 baseline。
     - 后端部署拓扑：采用模块化单体，当前阶段不引入独立的微服务 API 网关（见 ADR-0006）；跨切面关注点由部署级反向代理（nginx）+ 应用内 Spring Security filter（API Key 鉴权，ADR-0002/0003）+ Redis 限流承担；后端内部须保持清晰模块边界，便于未来渐进拆分为独立服务。
     - 配置与密钥管理（见 ADR-0007）：后端配置 yml-first（Spring Boot application.yml 体系）；仅提交 dev 环境配置（application.yml + application-dev.yml），且不得含真实密钥；test/prod 经 profile 预留切换、以 `.example` 模板提交；所有敏感项（AI 模型 Key、DB 口令、第三方密钥）通过启动参数或环境变量注入；仓库为开源，**真实密钥绝对禁止提交/推送到 GitHub**（.gitignore 已加本地覆盖文件与真实 prod/test yml 兜底）。
+    - 前端接口对接：本地开发经 nginx 反向代理转发后端接口（如 `/api` 前缀）规避浏览器跨域，而非开启宽松 CORS 或硬编码后端地址；与 ADR-0006 部署级 nginx 边缘保持一致，dev/prod 拓扑统一（见 local-dev-env spec）。
 
 rules:
   proposal:

@@ -104,3 +104,16 @@ The system SHOULD manage all schema changes via versioned migrations (Flyway), w
 - **GIVEN** 应用使用 MyBatis-Plus 做数据访问
 - **WHEN** 启动与部署
 - **THEN** Flyway 为 schema 真相源（管 DDL），禁用 `ddl-auto=update` 之类 ORM 自动建表，避免双源冲突
+
+### Requirement: 前端本地开发经 nginx 反向代理规避跨域
+The frontend SHOULD integrate with backend APIs through a local nginx reverse proxy during development (forwarding an `/api` prefix to the backend), rather than enabling permissive CORS or hardcoding backend origins; this keeps dev and prod edge topology consistent (see ADR-0006) and avoids browser CORS in local debugging.
+
+#### Scenario: 本地联调规避跨域
+- **GIVEN** 前端在本地开发、后端运行于另一端口或主机
+- **WHEN** 发起接口请求
+- **THEN** 前端请求同源（经本地 nginx 的 `/api` 前缀），由 nginx 转发到后端，浏览器不产生跨域，且不开启宽松 CORS
+
+#### Scenario: 与部署边缘一致
+- **GIVEN** 生产由 nginx 做部署级反向代理（ADR-0006）
+- **WHEN** 本地开发配置代理
+- **THEN** 本地复用同一 nginx 转发形态（仅后端地址不同），dev 与 prod 拓扑一致，减少环境差异
