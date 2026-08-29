@@ -21,6 +21,7 @@ context: |
     - Schema 变更用 Flyway 版本化迁移管理（见 ADR-0005）：每次结构变更新增增量 SQL 文件（V__），不回改历史、不手改 CREATE TABLE；禁用 ORM 自动建表（ddl-auto）作为 schema 真相源，Flyway 与 MyBatis-Plus 分工（DDL vs DML）。
     - 依赖与技术选型原则：前后端用到的框架与组件，原则上在长期支持（LTS）的稳定版本中选择最新的；JDK 最低版本 21（Java 21 LTS 及以上，优先选用 LTS 内最新稳定版，如 Java 21/25 LTS），不主动采用非 LTS 的短期版本。
     - 稳定与探索的平衡：在 LTS 基线保障核心链路稳定的前提下，允许在受控范围内尝试更新的特性与实验性技术（如新 SDK、新中间件、新 AI 能力）。实验性依赖须隔离在独立模块或特性开关之后，经 agent-dev-loop 沙箱或非生产环境验证，不得进入核心链路、不得破坏 baseline 兼容性，且须通过 OpenSpec change 走评审，而非直接修改 baseline。
+    - 后端部署拓扑：采用模块化单体，当前阶段不引入独立的微服务 API 网关（见 ADR-0006）；跨切面关注点由部署级反向代理（nginx）+ 应用内 Spring Security filter（API Key 鉴权，ADR-0002/0003）+ Redis 限流承担；后端内部须保持清晰模块边界，便于未来渐进拆分为独立服务。
 
 rules:
   proposal:
