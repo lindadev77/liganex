@@ -6,7 +6,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-2026--07--28-red.svg)](https://modelcontextprotocol.org)
-[![Stack](https://img.shields.io/badge/Backend-Spring%20Boot%203.x-6DB33F.svg)](https://spring.io)
+[![Stack](https://img.shields.io/badge/Backend-Spring%20Boot%204.1-6DB33F.svg)](https://spring.io)
 [![Topics](https://img.shields.io/badge/topics-mcp%20%7C%20agent%20%7C%20erp%20%7C%20cross--border-ecommerce-orange.svg)](#)
 
 ---
@@ -20,7 +20,7 @@ Liganex 是一套围绕 **Model Context Protocol (MCP)** 构建的开源实验�
 | 组件 | 定位 | 仓库 |
 |---|---|---|
 | **Liganex MCP Server** | 供给侧：把 ERP 数据与能力暴露为 MCP tools | `liganex-mcp` |
-| **Liganex Studio** | 客户端：轻量 MCP Host / 编排运行时 | `liganex-studio` |
+| **Liganex Studio** | 客户端：轻量 MCP Host / 编排运行时（B 端前端 + 后端，同仓） | `server/liganex-studio-backend` + `studio-frontend` |
 | **Liganex Skills** | 能力封装：面向跨境 ERP 的领域 Skill 包 | `liganex-skills` |
 | **Liganex Hub** | 分发：Skill 注册表 + MCP Server 注册中心 | `liganex-hub` |
 
@@ -57,17 +57,32 @@ Liganex 是一套围绕 **Model Context Protocol (MCP)** 构建的开源实验�
 | `liganex` | 本仓库 —— 总入口、架构总览、Roadmap | P0 |
 | `liganex-mcp` | Java + Spring Boot 实现的 MCP Server | P0 |
 | `liganex-docs` | 设计文档、Spec、ADR | P0 |
-| `liganex-studio` | 客户端运行时 | P1 |
+| `liganex-studio`（已并入本仓） | 客户端运行时 → `server/liganex-studio-backend/` + `studio-frontend/` | P1 |
 | `liganex-skills` | 跨境 ERP 领域 Skill 包（MIT） | P1 |
 | `liganex-hub` | 注册表与分发 | P2 |
 | `liganex-support` | 智能客服问答示例 | P2 |
 | `.github` | 组织级 CI / 模板 | P0 |
 
-> 前后端同仓：业务仓库内用 `backend/` + `frontend/` 目录，不单独拆前端仓（对齐 Dify / Coze Studio / Langflow）。
+> 前后端同仓：Studio 客户端后端位于 `server/liganex-studio-backend/`（Spring Boot 4.1 多模块之一），
+> 前端位于 `studio-frontend/`（React 19 + Vite 8 + antd 6），不单独拆前端仓（对齐 Dify / Coze Studio / Langflow）。
+>
+> 本仓目录结构（后端为 Maven 多模块，前端为独立 Vite 工程）：
+> ```
+> liganex/
+> ├── server/                      # 后端多模块（liganex-server 聚合 POM，Spring Boot 4.1 + Java 21）
+> │   ├── liganex-common/          # 公共工具（占位）
+> │   ├── liganex-order/           # 订单领域（占位，当前由 studio-backend 承载，ADR-0009 服务化就绪）
+> │   ├── liganex-mcp/             # MCP Server（占位）
+> │   └── liganex-studio-backend/  # ★ Studio 后端：auth / 订单 / 开放平台 / MCP 鉴权
+> ├── studio-frontend/             # ★ Studio 前端：React 19 + Vite 8 + antd 6
+> ├── infra/local-dev/             # 本地基础设施（PG + Redis + RocketMQ）
+> ├── docs/adr/                    # 架构决策记录
+> └── openspec/                    # 变更提案
+> ```
 
 ## 技术选型要点
 
-- **后端**：Spring Boot 3.x + Java（企业 ERP 主栈，MCP Java SDK 可用，生态稀缺）
+- **后端**：Spring Boot 4.1 + Java 21 LTS（企业 ERP 主栈，MCP Java SDK 可用，生态稀缺）
 - **协议**：MCP **2026-07-28** 无状态核心 —— 单端点 POST、移除 `initialize`/`Mcp-Session-Id`、每请求 `_meta` 携带版本能力、`server/discover` 强制发现
 - **工具标注**：用 `tool.annotations`（`readOnlyHint` / `destructiveHint` / `idempotentHint` / `openWorldHint`）声明副作用等级，既是安全也是体验优化
 - **展示**：MCP Apps（`outputSchema` + `structuredContent`）让库存/利润看板结构化渲染

@@ -28,10 +28,10 @@
   </modules>
 
   <properties>
-    <!-- ADR-0001：JDK 采用 Java 25 LTS -->
-    <java.version>25</java.version>
+    <!-- ADR-0001：JDK ≥ 21，采用 Java 21 LTS（稳定优先，SB 4.1 兼容 17~26） -->
+    <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.release>25</maven.compiler.release>
+    <maven.compiler.release>21</maven.compiler.release>
     <mybatis-plus.version>3.5.17</mybatis-plus.version>
     <jjwt.version>0.13.0</jjwt.version>
     <postgresql.version>42.7.13</postgresql.version>

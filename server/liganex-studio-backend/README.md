@@ -8,7 +8,7 @@ ADR-0007（配置与密钥管理）、ADR-0008（前端选型）、ADR-0009（�
 
 ## 技术栈
 
-Java 25 LTS · Spring Boot 4.1.x · Maven · PostgreSQL 18（+pgvector）· Redis 8 · Flyway · MyBatis-Plus
+Java 21 LTS · Spring Boot 4.1.x · Maven · PostgreSQL 18（+pgvector）· Redis 8 · Flyway · MyBatis-Plus
 
 ## 三套独立鉴权（路径前缀隔离，见 ADR-0002 / ADR-0003）
 
