@@ -109,3 +109,25 @@ Liganex 是一套围绕 **Model Context Protocol (MCP)** 构建的开源实验�
 ## Topics
 
 `mcp` · `model-context-protocol` · `agent` · `erp` · `java` · `spring-boot` · `cross-border-ecommerce`
+
+## 开源许可
+
+本项目基于 [Apache License 2.0](LICENSE) 授权（`SPDX-License-Identifier: Apache-2.0`）。
+
+```
+Copyright 2026 Linda
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+允许自由使用、修改与再分发（含商业用途），但须保留版权声明与许可声明；作者不承担任何担保责任。完整条款见 [LICENSE](LICENSE)。
