@@ -4,7 +4,8 @@ context: |
   Project: Liganex — 面向跨境 ERP 的 Agent 应用生态平台。两层产品面：
   (1) 基础设施层 — MCP server、开放平台 hub、客户端 studio、skill、AI自动化/可观测/沙箱；
   (2) 应用层 — 面向 B 端客户的 AI 生成应用（文生文/文生文/文生图/图生图/图生视频），可消费 ERP 数据作为生成上下文。
-  Stack: Java（最低 21，优先 LTS 内最新稳定版）/ Spring Boot 3.x（LTS 内最新稳定版） (MCP server & hub), React 19 + TypeScript + Vite (frontend)，组件层 Ant Design 6 + ProComponents v3 + Ant Design X（见 ADR-0008）, Maven or Gradle.
+  Stack: Java 25 LTS（最低 21，优先 LTS 内最新稳定版）/ Spring Boot 4.1.x (mcp & hub & studio), React 19 + TypeScript + Vite (frontend)，组件层 Ant Design 6 + ProComponents v3 + Ant Design X（见 ADR-0008）, Maven.
+  Version note (2026-08): Spring Boot 3.5.x 已于 2026-06-30 结束 OSS 支持（EOL），新代码一律采用 4.1.x 稳定线；Spring Boot 无 LTS 概念，按 12 个月 OSS 窗口滚动，须紧跟最新稳定小版本。Spring Boot 4.1 最低 Java 17、支持至 Java 26。
   Protocol: MCP 2026-07-28 stateless core — no initialize handshake, no Mcp-Session-Id, single POST
             endpoint; required headers MCP-Protocol-Version / Mcp-Method / Mcp-Name; tool annotations;
             inputSchema; structuredContent (MCP Apps); server/discover.
@@ -19,7 +20,7 @@ context: |
     - 项目文档中凡需标注作者/决策人信息，统一使用 "Linda"（区分于 git 提交作者 lindadev77，后者为 GitHub 账号，保持不变）。
     - 主仓为 monorepo 入口，业务模块拆为独立 GitHub 仓库（详见 README 仓库清单）。
     - Schema 变更用 Flyway 版本化迁移管理（见 ADR-0005）：每次结构变更新增增量 SQL 文件（V__），不回改历史、不手改 CREATE TABLE；禁用 ORM 自动建表（ddl-auto）作为 schema 真相源，Flyway 与 MyBatis-Plus 分工（DDL vs DML）。
-    - 依赖与技术选型原则：前后端用到的框架与组件，原则上在长期支持（LTS）的稳定版本中选择最新的；JDK 最低版本 21（Java 21 LTS 及以上，优先选用 LTS 内最新稳定版，如 Java 21/25 LTS），不主动采用非 LTS 的短期版本。
+    - 依赖与技术选型原则：前后端用到的框架与组件，原则上在长期支持（LTS）的稳定版本中选择最新的；JDK 最低版本 21，当前采用 Java 25 LTS（优先 LTS 内最新稳定版），不主动采用非 LTS 的短期版本。Spring Boot 无 LTS 概念（12 个月 OSS 窗口），故按"最新稳定小版本"滚动：当前为 4.1.x，**禁止使用已 EOL 的 3.5.x 及更早版本**；升级 Spring Boot 前须确认目标版本的 Java 支持区间与移除的弃用项。
     - 稳定与探索的平衡：在 LTS 基线保障核心链路稳定的前提下，允许在受控范围内尝试更新的特性与实验性技术（如新 SDK、新中间件、新 AI 能力）。实验性依赖须隔离在独立模块或特性开关之后，经 agent-dev-loop 沙箱或非生产环境验证，不得进入核心链路、不得破坏 baseline 兼容性，且须通过 OpenSpec change 走评审，而非直接修改 baseline。
     - 后端部署拓扑：采用模块化单体，当前阶段不引入独立的微服务 API 网关（见 ADR-0006）；跨切面关注点由部署级反向代理（nginx）+ 应用内 Spring Security filter（API Key 鉴权，ADR-0002/0003）+ Redis 限流承担；后端内部须保持清晰模块边界，便于未来渐进拆分为独立服务。
     - 配置与密钥管理（见 ADR-0007）：后端配置 yml-first（Spring Boot application.yml 体系）；仅提交 dev 环境配置（application.yml + application-dev.yml），且不得含真实密钥；test/prod 经 profile 预留切换、以 `.example` 模板提交；所有敏感项（AI 模型 Key、DB 口令、第三方密钥）通过启动参数或环境变量注入；仓库为开源，**真实密钥绝对禁止提交/推送到 GitHub**（.gitignore 已加本地覆盖文件与真实 prod/test yml 兜底）。

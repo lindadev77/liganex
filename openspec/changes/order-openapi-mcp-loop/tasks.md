@@ -1,22 +1,22 @@
 ## 1. 数据模型与迁移（Flyway，ADR-0005）
-- [ ] 1.1 编写 V1__user_and_auth.sql：`user` 表（email / password_hash / status）、唯一索引
-- [ ] 1.2 编写 V2__open_platform.sql：`open_app`、`permission`、`app_permission`、`app_call_log`、`quota_usage`
-- [ ] 1.3 编写 V3__order.sql：`order` / `order_item` 分区表（时间 Range + 地区 List，ADR-0004）
-- [ ] 1.4 编写种子数据：权限字典（`order:read` 等）+ 演示订单（多地区 / 多状态）
+- [x] 1.1 编写 V1__user_and_auth.sql：`app_user` 表（email / password_hash / status）、唯一索引
+- [x] 1.2 编写 V2__open_platform.sql：`open_app`、`permission`、`app_permission`、`app_call_log`、`quota_usage`
+- [x] 1.3 编写 V3__order.sql：`customer_order` 分区表（月 RANGE + 地区 LIST 子分区，ADR-0004）
+- [x] 1.4 编写种子数据：权限字典（`order:read` 等）+ 演示订单（12 条，多地区 / 多状态）
 - [ ] 1.5 用 Testcontainers 跑一遍迁移，确保测试库与生产库同源
 
 ## 2. 用户认证（user-auth）
-- [ ] 2.1 实现注册接口：参数校验、邮箱唯一性、BCrypt 哈希、默认状态
-- [ ] 2.2 实现登录接口：校验凭证、签发 access / refresh token（JWT）
-- [ ] 2.3 实现 JWT 校验 filter 与 refresh 接口，接入 Spring Security
+- [x] 2.1 实现注册接口：参数校验、邮箱唯一性、BCrypt 哈希、默认状态
+- [x] 2.2 实现登录接口：校验凭证、签发 access / refresh token（JWT，HS256）
+- [x] 2.3 实现 JWT 校验 filter 与 refresh 接口，接入 Spring Security
 - [ ] 2.4 补集成测试：注册重复、登录失败、token 过期与刷新
 
 ## 3. 订单领域模块与内部服务接口（ADR-0009）
-- [ ] 3.1 建 order 模块包结构、DTO 与 Mapper，不外泄持久化实体
-- [ ] 3.2 实现订单查询领域服务（分页、地区 / 状态 / 时间筛选）
-- [ ] 3.3 实现 `/api/v1/orders/*` 前端接口（JWT 鉴权）
+- [x] 3.1 建 order 模块包结构、DTO 与 Mapper，不外泄持久化实体
+- [x] 3.2 实现订单查询领域服务（分页、地区 / 状态 / 时间筛选）
+- [x] 3.3 实现 `/api/v1/orders/*` 前端接口（JWT 鉴权）
 - [ ] 3.4 实现 `/internal/v1/orders/*` 内部接口（服务间 API Key 鉴权）
-- [ ] 3.5 定义 `OrderQueryClient` 接口 + 本地 / 远程两种实现（配置切换）
+- [x] 3.5 定义 `OrderQueryClient` 接口 + 本地实现（远程实现待拆服务时补）
 
 ## 4. 开放平台应用与权限集（open-platform-app）
 - [ ] 4.1 实现应用创建接口：生成 appid / appsecret，secret 仅哈希入库、明文只返回一次
