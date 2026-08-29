@@ -10,6 +10,7 @@ context: |
             inputSchema; structuredContent (MCP Apps); server/discover.
   Conventions:
     - 仓库统一 liganex- 前缀；前端置于业务仓的 frontend/ 目录，不单独建仓。
+    - 前后端工程分离：业务仓内 frontend/ 与 backend/ 为独立构建、独立部署、可不同技术栈的工程（工程级解耦），但同仓以集中 star（对齐 Dify/Coze Studio 惯例）。
     - AI 生成能力统一经模型供应商抽象层接入（首期 Volcengine 方舟/Seedream/即梦，预留 OpenAI 等），避免绑定单一厂商。
     - B 端应用面需具备按客户用量/配额控制（成本控制），与基础设施层的轻量授权（ADR-0002）边界不同。
     - 关键架构决策写入 docs/adr/，对应约束进入 openspec/specs/ 作为可验证事实来源。
