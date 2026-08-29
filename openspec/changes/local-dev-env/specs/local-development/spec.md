@@ -91,3 +91,16 @@ The system MUST tune autovacuum (frequency, thresholds, cost limit) and manage t
 - **GIVEN** 持续增长的大表
 - **WHEN** 运行维护
 - **THEN** autovacuum 按表调优并管理冻结，分区表各自独立 vacuum/analyze
+
+### Requirement: Schema 迁移版本化管理
+The system SHOULD manage all schema changes via versioned migrations (Flyway), where each structural change is an incremental, append-only SQL file (V__ prefix) rather than editing the initial CREATE TABLE or hand-running ALTER out-of-band; migrations are version-controlled and run in CI and integration tests.
+
+#### Scenario: 迭代新增字段
+- **GIVEN** 一次迭代需要在订单表新增一个字段
+- **WHEN** 变更表结构
+- **THEN** 新增一个 `V{n}__add_column.sql` 增量迁移文件，而非修改历史初始化 SQL；CI 与 Testcontainers 集成测试经迁移重建一致 schema
+
+#### Scenario: ORM 不自动建表
+- **GIVEN** 应用使用 MyBatis-Plus 做数据访问
+- **WHEN** 启动与部署
+- **THEN** Flyway 为 schema 真相源（管 DDL），禁用 `ddl-auto=update` 之类 ORM 自动建表，避免双源冲突

@@ -18,6 +18,7 @@ context: |
     - spec 使用 RFC 2119 关键词（SHALL/MUST/SHOULD），场景使用 GIVEN/WHEN/THEN。
     - 项目文档中凡需标注作者/决策人信息，统一使用 "Linda"（区分于 git 提交作者 lindadev77，后者为 GitHub 账号，保持不变）。
     - 主仓为 monorepo 入口，业务模块拆为独立 GitHub 仓库（详见 README 仓库清单）。
+    - Schema 变更用 Flyway 版本化迁移管理（见 ADR-0005）：每次结构变更新增增量 SQL 文件（V__），不回改历史、不手改 CREATE TABLE；禁用 ORM 自动建表（ddl-auto）作为 schema 真相源，Flyway 与 MyBatis-Plus 分工（DDL vs DML）。
 
 rules:
   proposal:
