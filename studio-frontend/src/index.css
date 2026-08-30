@@ -10,3 +10,167 @@ body {
     'Microsoft YaHei', sans-serif;
   background: #f0f2f5;
 }
+
+.studio-content {
+  min-width: 0;
+  margin: 24px;
+}
+
+.knowledge-card {
+  height: 100%;
+}
+
+.chat-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 16px;
+  height: calc(100vh - 112px);
+  min-height: 560px;
+}
+
+.conversation-panel,
+.chat-main {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.conversation-panel .ant-card-body {
+  height: calc(100% - 57px);
+  overflow-y: auto;
+}
+
+.conversation-item {
+  margin-bottom: 4px;
+  padding: 10px 8px !important;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.conversation-item:hover,
+.conversation-item.is-active {
+  background: #e6f4ff;
+}
+
+.conversation-item .ant-list-item-action {
+  margin-inline-start: 4px;
+}
+
+.chat-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-main > .ant-card-head {
+  flex: 0 0 auto;
+}
+
+.chat-main > .ant-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.chat-alert {
+  margin: 16px 16px 0;
+}
+
+.chat-empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+}
+
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px clamp(16px, 5vw, 72px);
+}
+
+.message-row {
+  display: flex;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto 24px;
+}
+
+.message-user {
+  flex-direction: row-reverse;
+}
+
+.message-avatar {
+  flex: 0 0 auto;
+  background: #1677ff;
+}
+
+.message-user .message-avatar {
+  background: #52c41a;
+}
+
+.message-content-wrap {
+  min-width: 0;
+  max-width: min(78%, 760px);
+}
+
+.message-bubble {
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
+}
+
+.message-user .message-bubble {
+  border-color: #bae0ff;
+  background: #e6f4ff;
+}
+
+.citation-collapse {
+  margin-top: 8px;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.citation-item {
+  align-items: flex-start !important;
+}
+
+.composer {
+  flex: 0 0 auto;
+  padding: 16px clamp(16px, 5vw, 72px);
+  border-top: 1px solid #f0f0f0;
+  background: #fff;
+}
+
+.composer-actions {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 10px;
+}
+
+@media (max-width: 900px) {
+  .studio-content {
+    margin: 12px;
+  }
+
+  .chat-shell {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .conversation-panel {
+    max-height: 260px;
+  }
+
+  .chat-main {
+    height: calc(100vh - 380px);
+    min-height: 520px;
+  }
+
+  .message-content-wrap {
+    max-width: calc(100% - 44px);
+  }
+}

@@ -22,6 +22,8 @@
     <!-- java.version / maven.compiler.release 继承自父 pom（liganex-server），当前为 Java 21 LTS -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <mybatis-plus.version>3.5.16</mybatis-plus.version>
+    <langchain4j.version>1.19.0</langchain4j.version>
+    <pdfbox.version>3.0.6</pdfbox.version>
     <!--
       Spring Cloud 兼容版本线（为将来转微服务预留，见 ADR-0006 / ADR-0009）。
       兼容矩阵（Spring Cloud 官方）：
@@ -115,6 +117,23 @@
       <artifactId>spring-boot-starter-data-redis</artifactId>
     </dependency>
 
+    <!-- RAG: 仅复用统一模型 API；pgvector 表与混合检索 SQL 由本项目管理 -->
+    <dependency>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j-core</artifactId>
+      <version>${langchain4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j-open-ai</artifactId>
+      <version>${langchain4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>${pdfbox.version}</version>
+    </dependency>
+
     <!-- Observability -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -131,6 +150,12 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Spring Boot 4 把 Web 测试切片拆成独立 starter：@WebMvcTest/MockMvc 需显式引入 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webmvc-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

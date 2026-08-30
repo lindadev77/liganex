@@ -32,8 +32,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnexpected(Exception ex) {
-        // 仅记录日志，不向调用方回传堆栈或内部信息
-        log.error("unexpected error", ex);
+        log.error("unexpected error type={} message={}",
+                ex.getClass().getName(),
+                SensitiveDataSanitizer.sanitize(ex.getMessage()));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.fail(ErrorCode.INTERNAL_ERROR));
     }

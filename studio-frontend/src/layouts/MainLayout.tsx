@@ -14,7 +14,16 @@ export default function MainLayout() {
     navigate('/login', { replace: true });
   };
 
-  const selectedKey = location.pathname.startsWith('/open') ? '/open/apps' : '/open/apps';
+  const navigation = [
+    { key: '/open/apps', label: '我的应用', match: (path: string) => path.startsWith('/open') },
+    {
+      key: '/knowledge/bases',
+      label: '知识库管理',
+      match: (path: string) => path.startsWith('/knowledge'),
+    },
+    { key: '/chat', label: '智能问答', match: (path: string) => path.startsWith('/chat') },
+  ];
+  const activeItem = navigation.find((item) => item.match(location.pathname)) ?? navigation[0];
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -25,8 +34,8 @@ export default function MainLayout() {
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={[selectedKey]}
-          items={[{ key: '/open/apps', label: '我的应用' }]}
+          selectedKeys={[activeItem.key]}
+          items={navigation.map(({ key, label }) => ({ key, label }))}
           onClick={({ key }) => navigate(key)}
         />
       </Sider>
@@ -42,14 +51,14 @@ export default function MainLayout() {
           }}
         >
           <Typography.Title level={4} style={{ margin: 0 }}>
-            开放平台
+            {activeItem.label}
           </Typography.Title>
           <Space>
             <span style={{ color: 'rgba(0,0,0,0.65)' }}>{email}</span>
             <Button onClick={onLogout}>退出</Button>
           </Space>
         </Header>
-        <Content style={{ margin: 24 }}>
+        <Content className="studio-content">
           <Outlet />
         </Content>
       </Layout>

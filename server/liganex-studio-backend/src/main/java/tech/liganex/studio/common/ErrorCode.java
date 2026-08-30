@@ -27,6 +27,16 @@ public enum ErrorCode {
     ORDER_QUERY_FAILED(43001, "订单查询失败"),
     ORDER_NOT_FOUND(43002, "订单不存在"),
 
+    // 知识库（knowledge-base-rag）
+    KNOWLEDGE_BASE_NOT_FOUND(40410, "知识库不存在"),
+    KNOWLEDGE_DOCUMENT_NOT_FOUND(40411, "知识文档不存在"),
+    KNOWLEDGE_DOCUMENT_EMPTY(40010, "知识文档内容不能为空"),
+    KNOWLEDGE_DOCUMENT_TOO_LARGE(40011, "知识文档超过大小限制"),
+    KNOWLEDGE_DOCUMENT_TYPE_UNSUPPORTED(40012, "仅支持 TXT、Markdown 和 PDF 文件"),
+    KNOWLEDGE_DOCUMENT_FILENAME_INVALID(40013, "文件名不合法"),
+    KNOWLEDGE_DOCUMENT_RETRY_NOT_ALLOWED(40014, "仅处理失败的文档可以重试"),
+    KNOWLEDGE_DOCUMENT_ALREADY_EXISTS(40015, "知识库中已存在相同内容的文档"),
+
     // 内部服务接口（internal-api）
     INTERNAL_API_KEY_INVALID(45001, "服务间凭证无效"),
 
