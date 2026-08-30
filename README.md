@@ -28,6 +28,22 @@ Liganex 是一套围绕 **Model Context Protocol (MCP)** 构建的开源实验�
 
 业务场景以**业务运营**为锚点：订单流转、商品目录、多仓库存 —— 用一套真实可跑的数据模型承载 Agent 与业务系统的对接。
 
+项目已集成 **OpenSpec** 进行需求与变更管理：主规格沉淀在 [`openspec/specs/`](openspec/specs/)，每项变更在 [`openspec/changes/`](openspec/changes/) 中统一维护 proposal、design、specs 与 tasks，确保需求、设计和实现过程可追踪。
+
+## 界面预览
+
+### 应用权限管理
+
+开放平台支持为应用按需配置 MCP 接口权限，权限保存后即时生效，为工具调用提供最小权限控制。
+
+![Liganex Studio 应用权限管理](docs/assets/screenshots/studio-app-permissions.png)
+
+### Skill 包分发
+
+Studio 按业务域展示可下载的 Skill 包及其能力范围，开发者可将包安装到 Agent 终端，通过应用凭证连接 Liganex MCP 服务。
+
+![Liganex Studio Skill 包分发](docs/assets/screenshots/studio-skill-packages.png)
+
 ## 为什么不垂直化命名
 
 名字保持通用。`liganex` 全站零同名（GitHub total: 0），而垂直化的名字（如 `temu-erp-agent`）会把天花板锁死还绑死平台。业务场景是**可替换的落地场景**，不是项目前缀。
