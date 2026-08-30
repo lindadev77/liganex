@@ -433,7 +433,14 @@ export default function ChatPage() {
 
       <Card
         className="chat-main"
-        title={activeConversation?.title ?? '智能问答'}
+        title={
+          <div>
+            <div>{activeConversation?.title ?? '智能问答'}</div>
+            <Typography.Text type="secondary" style={{ fontSize: 13, fontWeight: 400 }}>
+              基于所选知识库作答，并附引用来源
+            </Typography.Text>
+          </div>
+        }
         extra={
           <Space wrap>
             {activeConversation?.knowledgeBaseIds.map((id) => (

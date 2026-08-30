@@ -32,20 +32,20 @@ export default function RegisterPage() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Card style={{ width: 380 }}>
-        <Typography.Title level={3} style={{ textAlign: 'center', marginBottom: 4 }}>
-          Liganex Studio
-        </Typography.Title>
-        <Typography.Paragraph type="secondary" style={{ textAlign: 'center' }}>
-          开放平台 · 注册
+    <div className="auth-shell">
+      <Card className="auth-card">
+        <div style={{ textAlign: 'center', marginBottom: 8 }}>
+          <img
+            src="/brand/liganex-lockup.png"
+            alt="Liganex"
+            style={{ width: 240, maxWidth: '100%' }}
+          />
+        </div>
+        <Typography.Paragraph type="secondary" style={{ textAlign: 'center', marginBottom: 4 }}>
+          Agent 应用生态 · 一站式工作台
+        </Typography.Paragraph>
+        <Typography.Paragraph type="secondary" style={{ textAlign: 'center', fontSize: 13, marginTop: 0 }}>
+          连接工具、平台与服务，统一管理应用、知识库与智能问答
         </Typography.Paragraph>
         <Form form={form} layout="vertical" onFinish={onFinish} disabled={loading}>
           <Form.Item

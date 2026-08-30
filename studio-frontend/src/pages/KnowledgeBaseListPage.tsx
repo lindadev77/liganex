@@ -105,7 +105,14 @@ export default function KnowledgeBaseListPage() {
 
   return (
     <Card
-      title="知识库管理"
+      title={
+        <div>
+          <div>知识库管理</div>
+          <Typography.Text type="secondary" style={{ fontSize: 13, fontWeight: 400 }}>
+            上传文档或录入文本，构建可被智能问答检索的知识来源
+          </Typography.Text>
+        </div>
+      }
       extra={
         <Button type="primary" onClick={openCreate}>
           新建知识库

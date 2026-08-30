@@ -127,7 +127,7 @@ export default function KnowledgeBaseDetailPage() {
         const values = await textForm.validateFields();
         await createTextDocument(id, values);
       } else {
-        const file = fileList[0]?.originFileObj;
+        const file = (fileList[0]?.originFileObj ?? fileList[0]) as File | undefined;
         if (!file) {
           message.warning('请选择要上传的文件');
           return;

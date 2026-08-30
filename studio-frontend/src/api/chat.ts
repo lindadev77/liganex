@@ -212,7 +212,7 @@ export async function consumeSseStream(
   let buffer = '';
   let completed = false;
   try {
-    while (true) {
+    while (!completed) {
       const { value, done } = await reader.read();
       buffer += decoder.decode(value, { stream: !done });
       const blocks = buffer.split(/\r?\n\r?\n/);

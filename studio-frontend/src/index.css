@@ -16,6 +16,47 @@ body {
   margin: 24px;
 }
 
+/* 侧边栏（浅色） */
+.sider-brand {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  overflow: hidden;
+}
+
+.sider-logo-lockup {
+  width: 100%;
+  max-width: 160px;
+  height: auto;
+}
+
+.sider-logo-mark {
+  height: 28px;
+  width: auto;
+}
+
+/* 登录 / 注册页 */
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(1000px 520px at 50% -8%, #e8f0ff 0%, rgba(232, 240, 255, 0) 55%),
+    linear-gradient(180deg, #f7f9fc 0%, #eef2f8 100%);
+}
+
+.auth-card {
+  width: 380px;
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(20, 40, 80, 0.1);
+}
+
 .knowledge-card {
   height: 100%;
 }

@@ -44,9 +44,17 @@ Studio 按业务域展示可下载的 Skill 包及其能力范围，开发者可
 
 ![Liganex Studio Skill 包分发](docs/assets/screenshots/studio-skill-packages.png)
 
-## 为什么不垂直化命名
+### 知识库管理
 
-名字保持通用。`liganex` 全站零同名（GitHub total: 0），而垂直化的名字（如 `temu-erp-agent`）会把天花板锁死还绑死平台。业务场景是**可替换的落地场景**，不是项目前缀。
+用户可创建知识库、上传文档（支持 Markdown / PDF 等格式），系统自动分块并生成向量索引，供智能问答检索引用。知识库与文档按登录用户隔离，删除时级联清理向量映射记录。
+
+![Liganex Studio 知识库管理](docs/assets/screenshots/studio-knowledge-base.png)
+
+### 智能问答
+
+基于所选知识库进行对话式检索，AI 回答附带引用来源（文档名、分块 ID、摘要），支持流式输出。会话按用户隔离，内置分层记忆（L0 完整历史 / L1 近期窗口 / L2 滚动摘要）。
+
+![Liganex Studio 智能问答](docs/assets/screenshots/studio-chat.png)
 
 ## 架构（四层）
 

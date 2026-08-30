@@ -174,7 +174,14 @@ export default function OpenAppPage() {
 
   return (
     <Card
-      title="我的应用"
+      title={
+        <div>
+          <div>我的应用</div>
+          <Typography.Text type="secondary" style={{ fontSize: 13, fontWeight: 400 }}>
+            创建应用并配置接口权限，供 Agent 通过 MCP 调用你的数据与能力
+          </Typography.Text>
+        </div>
+      }
       extra={
         <Space>
           <Button onClick={openSkills}>Skill 包</Button>
