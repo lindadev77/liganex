@@ -100,22 +100,29 @@ class Handler(BaseHTTPRequestHandler):
         return self._json({"error": {"message": f"unsupported path {self.path}"}}, 404)
 
     def _stream(self, text: str):
+        # SSE 没有 Content-Length，必须显式使用 chunked 编码，
+        # 否则 HTTP/1.1 客户端不知道实体何时结束，会一直挂起（表现为前端流式无响应）。
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")
         self.send_header("Connection", "keep-alive")
+        self.send_header("Transfer-Encoding", "chunked")
         self.end_headers()
         chunks = [text[i:i + 24] for i in range(0, len(text), 24)] or [""]
         for chunk in chunks:
             frame = {"id": "chatcmpl-stub", "object": "chat.completion.chunk",
                      "created": int(time.time()), "model": "stub",
                      "choices": [{"index": 0, "delta": {"content": chunk}, "finish_reason": None}]}
-            self.wfile.write(f"data: {json.dumps(frame)}\n\n".encode("utf-8"))
-            self.wfile.flush()
+            self._write_chunk(f"data: {json.dumps(frame)}\n\n".encode("utf-8"))
         done = {"id": "chatcmpl-stub", "object": "chat.completion.chunk", "created": int(time.time()),
                 "model": "stub", "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}]}
-        self.wfile.write(f"data: {json.dumps(done)}\n\n".encode("utf-8"))
-        self.wfile.write(b"data: [DONE]\n\n")
+        self._write_chunk(f"data: {json.dumps(done)}\n\n".encode("utf-8"))
+        self._write_chunk(b"data: [DONE]\n\n")
+        self.wfile.write(b"0\r\n\r\n")
+        self.wfile.flush()
+
+    def _write_chunk(self, data: bytes):
+        self.wfile.write(f"{len(data):X}\r\n".encode() + data + b"\r\n")
         self.wfile.flush()
 
 

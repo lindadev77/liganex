@@ -86,6 +86,17 @@ public class ChatGenerationService {
         AtomicBoolean finished = new AtomicBoolean(false);
         try {
             pending = persistence.prepare(ownerUserId, conversationId, question.trim());
+            if (knowledgeBaseIds == null || knowledgeBaseIds.isEmpty()) {
+                // 会话绑定的知识库可能已被删除（chat_conversation_kb 随之外键级联清空），
+                // 此时检索范围为空，不应把空集合下推到 SQL 的 ANY(?)，而是给出明确提示。
+                String noAnswer = "当前会话没有可用的知识库，请先在会话设置中选择知识库。";
+                persistence.complete(ownerUserId, pending.assistantMessage().getId(), noAnswer, "[]");
+                send(emitter, "token", new TokenEvent(noAnswer));
+                send(emitter, "done", new DoneEvent(pending.assistantMessage().getId(), noAnswer, List.of()));
+                emitter.complete();
+                finished.set(true);
+                return;
+            }
             float[] queryEmbedding = models.embed(List.of(question)).getFirst();
             List<KnowledgeIndex.IndexHit> hits = index.search(new KnowledgeIndex.SearchQuery(
                     ownerUserId, Set.copyOf(knowledgeBaseIds), question, tokenizer.terms(question), queryEmbedding,
