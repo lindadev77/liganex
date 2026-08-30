@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="docs/assets/liganex-logo.png" alt="Liganex Logo" width="220">
+  <img src="docs/assets/liganex-lockup.png" alt="Liganex" width="420">
 </p>
-
-<h1 align="center">Liganex</h1>
 
 > Agent 应用生态的连接层 —— 让模型接得上工具，让开发者接得上平台，让用户接得上服务。
 >
