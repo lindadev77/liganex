@@ -17,7 +17,7 @@ context: |
     - 关键架构决策写入 docs/adr/，对应约束进入 openspec/specs/ 作为可验证事实来源。
     - 安全采用轻量授权：单一 API Key + 工具白名单 + 全量审计日志 + 演示只读副本；不做 OAuth 2.1。
     - spec 使用 RFC 2119 关键词（SHALL/MUST/SHOULD），场景使用 GIVEN/WHEN/THEN。
-    - 项目文档中凡需标注作者/决策人信息，统一使用 "Linda"（区分于 git 提交作者 lindadev77，后者为 GitHub 账号，保持不变）。
+    - 署名统一规则（避免同一人出现多个身份导致贡献统计分裂）：版权/法律文件（LICENSE、README 版权行、POM developer）用组织名 "lindaailabs"；工程文档的作者/决策人（ADR、设计文档）用 GitHub 账号 "lindadev77"（可点击追溯）；git 提交作者用 "lindadev77"。示例报文、测试数据中的人名不属于署名，不套用本规则。
     - 主仓为 monorepo 入口，业务模块拆为独立 GitHub 仓库（详见 README 仓库清单）。
     - Schema 变更用 Flyway 版本化迁移管理（见 ADR-0005）：每次结构变更新增增量 SQL 文件（V__），不回改历史、不手改 CREATE TABLE；禁用 ORM 自动建表（ddl-auto）作为 schema 真相源，Flyway 与 MyBatis-Plus 分工（DDL vs DML）。
     - 依赖与技术选型原则：前后端用到的框架与组件，原则上在长期支持（LTS）的稳定版本中选择最新的；JDK 最低版本 21，当前采用 Java 25 LTS（优先 LTS 内最新稳定版），不主动采用非 LTS 的短期版本。Spring Boot 无 LTS 概念（12 个月 OSS 窗口），故按"最新稳定小版本"滚动：当前为 4.1.x，**禁止使用已 EOL 的 3.5.x 及更早版本**；升级 Spring Boot 前须确认目标版本的 Java 支持区间与移除的弃用项。

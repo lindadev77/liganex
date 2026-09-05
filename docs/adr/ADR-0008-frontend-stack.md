@@ -1,7 +1,7 @@
 # ADR-0008: 前端技术选型 — React 19 + Ant Design 6（而非 Vue 3）
 
 - **状态**：已采纳（2026-08-29）
-- **决策人**：Linda
+- **决策人**：lindadev77
 - **关联**：ADR-0001（项目定位）、config 技术选型原则（LTS 内最新稳定版）、project-architecture（单一前端入口）、bend-ai-generation（AI 创作与流式对话）
 
 ## 背景

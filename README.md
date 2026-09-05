@@ -170,7 +170,7 @@ npm run dev           # Vite 反代 /api → http://127.0.0.1:8081，访问 http
 本项目基于 [Apache License 2.0](LICENSE) 授权（`SPDX-License-Identifier: Apache-2.0`）。
 
 ```
-Copyright 2026 Linda
+Copyright 2026 lindaailabs
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
